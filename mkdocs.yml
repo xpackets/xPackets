@@ -1,34 +1,15 @@
-site_name: Knit
-site_description: Documentation for Knit
-site_author: Stephen Leitnick
-site_url: https://sleitnick.github.io/Knit/
-repo_url: https://github.com/Sleitnick/Knit
-repo_name: Knit
-copyright: Copyright &copy; 2020 - 2021 Stephen Leitnick
+site_name: XPacket
+site_description: Documentation for XPacket
+site_author: RootEntry
+site_url: https://xpackets.github.io/xPackets/
+repo_url: https://github.com/xpackets/xPackets
+repo_name: XPacket
+copyright: Copyright &copy; 2021 RootEntry
 
 nav:
   - Home: index.md
-  - Why Knit: whyknit.md
   - Getting Started: gettingstarted.md
-  - Services: services.md
-  - Controllers: controllers.md
-  - Util: 
-    - Component: util/component.md
-    - Maid: util/maid.md
-    - Option: util/option.md
-    - Promise: util/promise.md
-    - RemoteSignal: util/remotesignal.md
-    - RemoteProperty: util/remoteproperty.md
-    - Signal: util/signal.md
-    - Streamable: util/streamable.md
-    - StreamableUtil: util/streamableutil.md
-    - TableUtil: util/tableutil.md
-    - Thread: util/thread.md
-  - Knit API: knitapi.md
-  - Execution Model: executionmodel.md
-  - VS Code Snippets: vscodesnippets.md
-  - Examples: examples.md
-  - Style Guide: styleguide.md
+  - XPacket API: xpacketapi.md
 
 theme:
   logo: "img/logo.png"
@@ -44,20 +25,11 @@ theme:
       accent: light blue
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue
-      accent: light blue
+      primary: teal
+      accent: deep orange
   highlightjs: true
   hljs_languages:
     - lua
-
-extra:
-  social:
-    - icon: fontawesome/brands/github-alt
-      link: https://github.com/Sleitnick/Knit
-      name: GitHub repository for Knit
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/sleitnick
-      name: Twitter for Knit's author
 
 markdown_extensions:
   - pymdownx.highlight:

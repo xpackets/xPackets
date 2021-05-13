@@ -1,0 +1,40 @@
+site_name: XPacket
+site_description: Documentation for XPacket
+site_author: RootEntry
+site_url: https://xpackets.github.io/xPackets/
+repo_url: https://github.com/xpackets/xPackets
+repo_name: XPacket
+copyright: Copyright &copy; 2021 RootEntry
+
+nav:
+  - Home: index.md
+  - Getting Started: gettingstarted.md
+  - XPacket API: xpacketapi.md
+
+theme:
+  logo: "img/logo.png"
+  favicon: "img/favicon.png"
+  name: material
+  font:
+    text: Ubuntu
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: light blue
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep orange
+  highlightjs: true
+  hljs_languages:
+    - lua
+
+markdown_extensions:
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - admonition
+  - toc:
+      permalink: true

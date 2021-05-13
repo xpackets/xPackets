@@ -5,6 +5,16 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+
+if RunService:IsServer() then
+	if ReplicatedStorage:FindFirstChild("PacketSender_Func") then
+	else
+		local newFunc = Instance.new("RemoteFunction")
+		newFunc.Name = "PacketSender_Func"
+		newFunc.Parent = ReplicatedStorage
+	end
+end
 
 local EnumList = require(script.EnumList)
 local Thread = require(script.Thread)

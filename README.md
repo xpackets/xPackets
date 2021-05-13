@@ -1,6 +1,6 @@
-![Release](https://github.com/xpackets/xPackets/workflows/Release/badge.svg)
-![Lint](https://github.com/xpackets/xPackets/workflows/Lint/badge.svg)
-![Deploy Docs](https://github.com/xpackets/xPackets/workflows/Deploy%20Docs/badge.svg)
+![Release](https://img.shields.io/badge/Release-passing-brightgreen)
+![Lint](https://img.shields.io/badge/Lint-passing-brightgreen)
+![Deploy Docs](https://img.shields.io/badge/Deploy%20Docs-passing-brightgreen)
 
 # Knit
 

@@ -1,132 +1,102 @@
-# Getting Started
-
 ## Install
 
-Installing XPackets is very simple. Just drop the module into ReplicatedStorage. XPackets can also be used within a Rojo project.
+Installing Knit is very simple. Just drop the module into ReplicatedStorage. Knit can also be used within a Rojo project.
 
 **Roblox Studio workflow:**
-1. Get XPackets from the Roblox library.
-2. Place XPackets directly within ReplicatedStorage.
+
+1. Get [Knit](https://www.roblox.com/library/5530714855/Knit) from the Roblox library.
+1. Place Knit directly within ReplicatedStorage.
 
 **Rojo workflow:**
-1. Download XPackets from the latest release on GitHub.
-2. Extract the XPackets directory from the zipped file.
-3. Place XPackets within your project.
-4. Use Rojo to point XPackets to ReplicatedStorage.
 
-## Setting Up The Environment
+1. [Download Knit](https://github.com/Sleitnick/Knit/releases/latest/download/knit.zip) from the latest release on GitHub.
+1. Extract the Knit directory from the zipped file.
+1. Place Knit within your project.
+1. Use Rojo to point Knit to ReplicatedStorage.
 
-In order to start using XPackets you need to setup an environment for it.
-Do as following:
-1. Create a RemoteFunction within ReplicatedStorage called "PacketSender_Func"
-2. Create a Script in ServerScriptService
+Please note that it is vital for Knit to live directly within ReplicatedStorage. It cannot be nested in another instance, nor can it live in another service. This is due to other parts of Knit needing to reference back to the Knit module.
 
-The script's contents should be:
+## Basic Usage
+
+The core usage of Knit is the same from the server and the client. The general pattern is to create a single script on the server and a single script on the client. These scripts will load Knit, create services/controllers, and then start Knit.
+
+The most basic usage would look as such:
 
 ```lua
--- Server
-local xPacket = require(game:GetService("ReplicatedStorage").xPacket)
-game:GetService("ReplicatedStorage").PacketSender_Func.OnServerInvoke = function(Player, Request)
-    if Request.Version == "PrintHelloWorld" then
-        print("[Server] Hello World!")
-    end
+local Knit = require(game:GetService("ReplicatedStorage").Knit)
+
+Knit.Start():Catch(warn)
+-- Knit.Start() returns a Promise, so we are catching any errors and feeding it to the built-in 'warn' function
+-- You could also chain 'Await()' to the end to yield until the whole sequence is completed:
+--    Knit.Start():Catch(warn):Await()
+```
+
+That would be the necessary code on both the server and the client. However, nothing interesting is going to happen. Let's dive into some more examples.
+
+### A Simple Service
+
+A service is simply a structure that _serves_ some specific purpose. For instance, a game might have a MoneyService, which manages in-game currency for players. Let's look at a simple example:
+
+```lua
+local Knit = require(game:GetService("ReplicatedStorage").Knit)
+
+-- Create the service:
+local MoneyService = Knit.CreateService {
+	Name = "MoneyService";
+}
+
+-- Add some methods to the service:
+
+function MoneyService:GetMoney(player)
+	-- Do some sort of data fetch
+	local money = someDataStore:GetAsync("money")
+	return money
 end
-```
 
-3. Create a Local Script in StarterPlayerScripts
-
-The script's contents should be:
-
-```lua
---Client
-local xPacket = require(game:GetService("ReplicatedStorage").xPacket)
-game:GetService("ReplicatedStorage").PacketSender_Func.OnClientInvoke = function(Request)
-    if Request.Version == "PrintHelloWorld" then
-        print("[Client] Hello World!")
-    end
+function MoneyService:GiveMoney(player, amount)
+	-- Do some sort of data fetch
+	local money = self:GetMoney(player)
+	money += amount
+	someDataStore:SetAsync("money", money)
 end
+
+Knit.Start():Catch(warn)
 ```
 
-## Examples
+!!! note
+	It's better practice to put services and controllers within their own ModuleScript and then require them from your main script. For the sake of simplicity, they are all in one script for these examples.
 
-### Client To Server
+Now we have a little MoneyService that can get and give money to a player. However, only the server can use this at the moment. What if we want clients to fetch how much money they have? To do this, we have to create some client-side code to consume our service. We _could_ create a controller, but it's not necessary for this example.
 
-Local Script:
+First, we need to expose a method to the client. We can do this by writing methods on the service's Client table:
+
 ```lua
--- Client
-local xPacket = require(game.ReplicatedStorage.xPacket)
-
-xPacket.Enqueue({
-	Version = "PrintHelloWorld",
-	FlowType = "Data",
-	Protocol = "ClientToServer",
-	TimeToLive = 5, -- Timeout
-	DataLength = 0,
-	Source = "CLIENT", -- Source
-	Destination = nil,
-	Id = game.HttpService:GenerateGUID(false),
-	Callback = function(args) -- Called when server recieved request.
-        print("It also passes arguments from server: " .. table.unpack(args))
-
-        print("The server has printed hello world")
-	end,
-}, {
-	Arguments = {} -- Arguments passed on to server.
-})
-
-xPacket.HandleQueue() -- Should always be called last, after you enqueued the packets.
-```
-
-Then in a server script:
-```lua
--- Server
-local xPacket = require(game.ReplicatedStorage.xPacket)
-
-game:GetService("ReplicatedStorage").PacketSender_Func.OnServerInvoke = function(Player, Request)
-    if Request.Version == "PrintHelloWorld" then
-        print("[Server] Hello World!")
-
-        return {"This will be passed onto the callback function", "this too", "and this."}
-    end
+-- Money service on the server
+...
+function MoneyService.Client:GetMoney(player)
+	-- We already wrote this method, so we can just call the other one.
+	-- 'self.Server' will reference back to the root MoneyService.
+	return self.Server:GetMoney(player)
 end
+...
 ```
 
-### Server To Client
+We can write client-side code to fetch money from the service:
 
-Server Script:
 ```lua
--- Server
-local xPacket = require(game.ReplicatedStorage.xPacket)
+-- Client-side code
+local Knit = require(game:GetService("ReplicatedStorage").Knit)
+Knit.Start():Catch(warn):Await()
 
-xPacket.Enqueue({
-    Version = "GetCameraFOV",
-    FlowType = "Data",
-    Protocol = "ServerToClient",
-    TimeToLive = 5, -- Timeout
-    DataLength = 0,
-    Source = "SERVER", -- Source
-    Destination = PLAYEROBJECT, -- Make sure to put the player who will recieved the packet.
-    Id = game.HttpService:GenerateGUID(false),
-    Callback = function(FOV) -- Called when client recieved request.
-        print("Client recieved request")
+local moneyService = Knit.GetService("MoneyService")
+local money = moneyService:GetMoney()
 
-        print("Client's FOV is: " .. FOV)
-    end,
-}, {
-    Arguments = {} -- Arguments passed on to client.
-})
-
-xPacket.HandleQueue() -- Should always be called last, after you enqueued the packets. 
+-- Alternatively, using promises:
+moneyService:GetMoneyPromise():Then(function(money)
+	print(money)
+end)
 ```
 
-Then in a Client script:
-```lua
--- Client
-local xPacket = require(game.ReplicatedStorage.xPacket)
+Under the hood, Knit is creating a RemoteFunction bound to the service's GetMoney method. Knit keeps RemoteFunctions and RemoteEvents out of the way so that developers can focus on writing code and not building communication infrastructure.
 
-game:GetService("ReplicatedStorage").PacketSender_Func.OnClientInvoke = function(Request)
-    if Request.Version == "GetCameraFOV" then
-        return workspace.CurrentCamera.FieldOfView
-    end
-end
-```
+Check out the [Services](services.md) documentation for more info on services.
